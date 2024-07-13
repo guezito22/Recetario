@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetario en Línea</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        main {
+            width: 400px;
+            padding: 20px;
+            background-color: #333333;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        label, button {
+            display: block;
+            margin-top: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border: 1px solid #666666;
+            background-color: #555555;
+            color: #ffffff;
+            border-radius: 3px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        #recipe-details {
+            margin-top: 20px;
+            display: none;
+        }
+        #recipe-details h2 {
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        #recipe-details p {
+            color: #ffffff;
+        }
+        #recipe-details ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Recetario en Línea</h1>
+
+        <form id="recipe-form">
+            <label for="recipe-name">Nombre de la Receta:</label>
+            <input type="text" id="recipe-name" required>
+
+            <label for="recipe-ingredients">Ingredientes (separados por comas):</label>
+            <textarea id="recipe-ingredients" rows="4" required></textarea>
+
+            <label for="recipe-procedure">Procedimiento:</label>
+            <textarea id="recipe-procedure" rows="6" required></textarea>
+
+            <button type="submit">Agregar Receta</button>
+        </form>
+
+        <label for="recipes-dropdown">Selecciona una receta:</label>
+        <select id="recipes-dropdown" onchange="displayRecipeDetails()">
+            <option value="">Selecciona una receta</option>
+        </select>
+
+        <div id="recipe-details">
+            <h2 id="recipe-title"></h2>
+            <p><strong>Ingredientes:</strong></p>
+            <ul id="recipe-ingredients-details"></ul>
+            <p><strong>Procedimiento:</strong></p>
+            <p id="recipe-procedure-details"></p>
+            <button id="edit-recipe" onclick="editRecipe()">Editar</button>
+            <button id="delete-recipe" onclick="deleteRecipe()">Eliminar</button>
+        </div>
+    </main>
+
+    <script>
+        const form = document.getElementById('recipe-form');
+        const recipesDropdown = document.getElementById('recipes-dropdown');
+        const recipeTitle = document.getElementById('recipe-title');
+        const recipeIngredientsDetails = document.getElementById('recipe-ingredients-details');
+        const recipeProcedureDetails = document.getElementById('recipe-procedure-details');
+        const editRecipeButton = document.getElementById('edit-recipe');
+        const deleteRecipeButton = document.getElementById('delete-recipe');
+        let recipes = [];
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('recipe-name').value;
+            const ingredients = document.getElementById('recipe-ingredients').value.split(',').map(item => item.trim());
+            const procedure = document.getElementById('recipe-procedure').value;
+
+            if (name && ingredients.length > 0 && procedure) {
+                addRecipe(name, ingredients, procedure);
+                form.reset();
+            }
+        });
+
+        function addRecipe(name, ingredients, procedure) {
+            const recipe = { name, ingredients, procedure };
+            recipes.push(recipe);
+            updateRecipesDropdown();
+        }
+
+        function updateRecipesDropdown() {
+            recipesDropdown.innerHTML = '<option value="">Selecciona una receta</option>';
+            recipes.forEach((recipe, index) => {
+                recipesDropdown.innerHTML += `<option value="${index}">${recipe.name}</option>`;
+            });
+        }
+
+        function displayRecipeDetails() {
+            const selectedIndex = recipesDropdown.value;
+            if (selectedIndex !== '') {
+                const selectedRecipe = recipes[selectedIndex];
+                recipeTitle.textContent = selectedRecipe.name;
+                recipeIngredientsDetails.innerHTML = selectedRecipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('');
+                recipeProcedureDetails.textContent = selectedRecipe.procedure;
+                document.getElementById('recipe-details').style.display = 'block';
+            } else {
+                clearRecipeDetails();
+            }
+        }
+
+        function clearRecipeDetails() {
+            recipeTitle.textContent = '';
+            recipeIngredientsDetails.innerHTML = '';
+            recipeProcedureDetails.textContent = '';
+            document.getElementById('recipe-details').style.display = 'none';
+        }
+
+        function editRecipe() {
+            const selectedIndex = recipesDropdown.value;
+            if (selectedIndex !== '') {
+                const selectedRecipe = recipes[selectedIndex];
+                document.getElementById('recipe-name').value = selectedRecipe.name;
+                document.getElementById('recipe-ingredients').value = selectedRecipe.ingredients.join(', ');
+                document.getElementById('recipe-procedure').value = selectedRecipe.procedure;
+                
+                deleteRecipe(selectedIndex);
+                updateRecipesDropdown();
+                clearRecipeDetails();
+            }
+        }
+
+        function deleteRecipe() {
+            const selectedIndex = recipesDropdown.value;
+            if (selectedIndex !== '') {
+                recipes.splice(selectedIndex, 1);
+                updateRecipesDropdown();
+                clearRecipeDetails();
+            }
+        }
+    </script>
+</body>
+</html>
